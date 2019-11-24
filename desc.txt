@@ -4,8 +4,9 @@ The summarization is carried out on a single-topic based extract of Wikipedia pa
 TF-IDF doesn't seem to be that necessary in single-document summarisation. Let's see how it can be utilised in multi-document summarisation.
 
 Some features that can be used - 
-Location of sentence (in paragraph/in document).
-Length of the sentence (normalized).
-Magnitude of deviation of the sentence from the topic.
-Cohesion?
-Topic of the paragraph to which the sentence belongs?
+Location of sentence in the document.
+Length of the sentence (non-normalized).
+Paragraph topic deviation, in which the sentence is located.
+Does the sentence have words close to title/overall-topic
+
+Nouns? And cohesion? (For later)

@@ -52,7 +52,7 @@ for i, sent in enumerate(sentences):
         if word in words:
             sentence_scores[original_sentences[i]] += term_freq_matrix[word]
             
-num_output_sentences = 4
+num_output_sentences = int(np.ceil(0.4 * len(sentences)))
 threshold = sorted(list(sentence_scores.values()), reverse = True)[num_output_sentences]
 
 summary = []

@@ -16,7 +16,7 @@ for _, _, f in os.walk(data_path):
     for file in f:
         files.append(data_path + file)
         titles.append(file.split('.')[0])
-        
+
 app_id = ''
 api_key = ''
 with open('api_data.config', 'r') as file:
@@ -31,14 +31,17 @@ client = textapi.Client(app_id, api_key)
 summaries = {}
 text_data = {}
 
+index = 0
+
 for file_name in files:
     with open(file_name) as file:
         raw_data = file.read()
         data = BS(raw_data, features='lxml').text
         text_data[file_name] = data
-        summary = client.Summarize({'text': data, 'title': 'Isaac Newton'})
+        summary = client.Summarize({'text': data, 'title': titles[index]})
         summary = summary['sentences']
         summaries[file_name] = summary
+        index += 1
 
 #Vectorizing the text data of each file
 features = ['TF score', 'Relative Location', 'Relative Length', 'Label']
