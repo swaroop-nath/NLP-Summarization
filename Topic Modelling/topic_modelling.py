@@ -19,8 +19,8 @@ from gensim.models.wrappers import LdaMallet
 import spacy
 
 # Plotting tools
-import pyLDAvis
-import pyLDAvis.gensim
+#import pyLDAvis
+#import pyLDAvis.gensim
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
