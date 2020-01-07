@@ -14,7 +14,7 @@ data = BS(raw_data).text
 #Obtaining the tf/tf-idf score for the sentences
 sentences_with_scores = tf_idf_vectorize(data)
 
-columns = ['tf-score', 'length-score', 'position-score']
+columns = ['tf-score', 'length-score', 'position-score', 'paragraph-score', 'cue-words-score']
 
 sentences = sent_tokenize(data)
 
@@ -39,6 +39,8 @@ max_val = max(np.abs(min(vector_space['length-score']) - mean)/std_dev, np.abs(m
 #Rating mid-sized sentences with higher ratings
 vector_space['length-score'] = vector_space['length-score'].apply(lambda val: max_val - np.abs(mean - val)/std_dev)
 
+
+#-------Summarization Finalized Results--------
 #Calculating the final score for each sentence
 vector_space['sentence-score'] = vector_space.apply(lambda row: row['tf-score'] + row['length-score'] + row['position-score'], axis = 1)
 

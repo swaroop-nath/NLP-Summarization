@@ -1,6 +1,5 @@
 #Imports
 import re
-import os
 import string
 import matplotlib.pyplot as plt
 import spacy
