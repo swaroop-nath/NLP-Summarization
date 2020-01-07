@@ -3,26 +3,56 @@ import pandas as pd
 from bs4 import BeautifulSoup as BS
 from nltk import sent_tokenize, word_tokenize
 import numpy as np
+import spacy
+from spacy.lang.en.stop_words import STOP_WORDS as spacy_stop_words
+from topic_modelling import obtain_key_words
+
+#Pipeline
+def map_sentence_to_paragraph(vector_space, sentences, paragraphs):
+    for sentence in sentences:
+        for index, paragraph in enumerate(paragraphs):
+            if sentence in paragraph: vector_space.loc[sentence, 'paragraph_id'] = index
 
 #Reading data from the file
 raw_data = ''
-with open('../data.txt', 'r') as source:
+clues = []
+cue_words = []
+with open('source.data', 'r') as source:
     raw_data = source.read()
+
+with open('cue_words.data', 'r') as clues:
+    clues = clues.read().split(',')
+    
+lemmatizer = spacy.load('en_core_web_lg')
+
+for clue in clues:
+    for word in clue.split():
+        for doc in lemmatizer(word):
+            if doc.lemma_ not in spacy_stop_words: cue_words.append(doc.lemma_) 
     
 data = BS(raw_data).text
 
 #Obtaining the tf/tf-idf score for the sentences
 sentences_with_scores = tf_idf_vectorize(data)
 
-columns = ['tf-score', 'length-score', 'position-score', 'paragraph-score', 'cue-words-score']
+columns = ['tf-score', 'length-score', 'position-score', 'paragraph-score', 'cue-words-score', 'paragraph_id']
 
+paragraphs = data.split('\n')
 sentences = sent_tokenize(data)
 
 #Storing all the data in a DataFrame
 vector_space = pd.DataFrame(index = sentences, columns = columns)
 
+#Noting tf-idf scores of sentences
 for sentence, tf_idf_score in sentences_with_scores.items():
     vector_space.loc[sentence, 'tf-score'] = tf_idf_score
+    
+#Storing paragraphs and noting there scores
+map_sentence_to_paragraph(vector_space, sentences, paragraphs)
+
+for paragraph in paragraphs:
+    keywords = obtain_key_words(paragraph)
+    print(keywords)
     
 #Using Barrera and Verma's first model to score sentence based on the position
 total_sentences = len(sentences)

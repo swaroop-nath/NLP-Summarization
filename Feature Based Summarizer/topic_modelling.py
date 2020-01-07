@@ -1,15 +1,11 @@
 #Imports
 import re
 import string
-import matplotlib.pyplot as plt
 import spacy
 import gensim.corpora as corpora
 from gensim.models import ldamodel, CoherenceModel
-from gensim.models.wrappers import LdaMallet
 from nltk.tokenize import sent_tokenize, word_tokenize
 from spacy.lang.en.stop_words import STOP_WORDS as spacy_stop_words
-from wordcloud import WordCloud
-from sklearn.model_selection import GridSearchCV
 
 #Defining constants
 TOPICS_LIMIT = 10
@@ -23,7 +19,6 @@ FRACTION_OUTPUT = 0.25
 def get_stop_words(documents):
     stop_word_list = [word for word in spacy_stop_words]
     return stop_word_list
-    
   
 '''
     This method does removal of unnecessary notations (punctuations, apostrophe etc.), and tokenization.
