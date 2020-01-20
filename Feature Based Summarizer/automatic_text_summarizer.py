@@ -69,12 +69,12 @@ num_cue_words = len(cue_words)
 for sentence in original_sentences:
     matches = 0
     for word in cue_words:
-        if word in sentence_mapper[original_sentences]: matches += 1
-    vector_space.loc[sentence, 'cue-words-score'] = matches/num_cue_words 
+        if word in sentence_mapper[sentence]: matches += 1
+    vector_space.loc[sentence, 'cue-words-score'] = np.exp(matches/len(sentence_mapper[sentence])) 
 #This metric is very biased - if only 1 cue- word is given then its presence
 #will give a score of 1 - highly biases the sentences.
 #May be try to put a metric like - length of sentence on the denominator
-#and num words which have similarity more than .50 with the cue words
+#and num words which have similarity more than .50 with the cue words - currently only cue-words
     
 #----------Rating a sentence according to position and length------------
 #Using Barrera and Verma's first model to score sentence based on the position
