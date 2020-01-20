@@ -1,60 +1,13 @@
 #Imports
-import re
-import string
+import math
 import spacy
 import gensim.corpora as corpora
 from gensim.models import ldamodel, CoherenceModel
-from nltk.tokenize import sent_tokenize, word_tokenize
-from spacy.lang.en.stop_words import STOP_WORDS as spacy_stop_words
 
 #Defining constants
 TOPICS_LIMIT = 10
 NUM_PASSES = 100
 FRACTION_OUTPUT = 0.25
-
-#Pipelines
-'''
-    This method generates a list of stop words.
-'''
-def get_stop_words(documents):
-    stop_word_list = [word for word in spacy_stop_words]
-    return stop_word_list
-  
-'''
-    This method does removal of unnecessary notations (punctuations, apostrophe etc.), and tokenization.
-'''
-def generate_tokenized_documents(documents):
-    non_space_regex = '[0-9\[\]%/,()–“”\']'
-    tokenized_documents = []
-    
-    for doc in documents:
-        cleaned_doc = re.sub(non_space_regex, '', doc).translate(str.maketrans('', '', string.punctuation))
-        word_tokens = word_tokenize(cleaned_doc)
-        word_tokens = [word.lower() for word in word_tokens]
-        tokenized_documents.append(word_tokens)
-        
-    return tokenized_documents
-    
-'''
-    This method lemmatizes the documents.
-'''
-def generate_lemmatized_documents(tool, documents, allowed_pos_tags = ['NOUN', 'ADJ', 'VERB', 'ADV']):
-    lemmatized_documents = []
-    for doc in documents:
-        lemma_generator = tool(' '.join(doc))
-        lemmatized_sentence = [token.lemma_ for token in lemma_generator if len(token) > 2]
-        lemmatized_documents.append(lemmatized_sentence)
-    return lemmatized_documents
-   
-'''
-This method generates a cleaned document free of stop words.
-'''
-def remove_stop_words(stop_word_list, documents):
-    cleaned_documents = []
-    for doc in documents:
-        cleaned_doc = [word for word in doc if word not in stop_word_list]
-        cleaned_documents.append(cleaned_doc)
-    return cleaned_documents
 
 def find_optimum_topics(corpus, final_documents, word_dict):
     topics_wise_score = {}
@@ -119,30 +72,14 @@ def build_lda_model(corpus, final_documents, word_dict):
     return best_lda_model
         
 
-def obtain_key_words(data):
-    #Intializing spacy tool
-    spacy_tool = spacy.load('en', disable=['parser', 'ner'])
-        
-    #Tokenize into sentences
-    documents = sent_tokenize(data)
-    
-    #Removing punctuations and generating tokenized documents
-    tokenized_documents = generate_tokenized_documents(documents)
-    
-    #Getting stop words based on the context and removing them
-    stop_word_list = get_stop_words(tokenized_documents)
-    cleaned_documents = remove_stop_words(stop_word_list, tokenized_documents)
-    
-    #Generating lemmatized documents
-    final_documents = generate_lemmatized_documents(spacy_tool, cleaned_documents)
-    
+def obtain_key_words(paragraph, spacy_tool = spacy.load('en_core_web_md', disable = ['parser', 'ner'])):
     #Creating a dictionary of words
-    word_dict = corpora.Dictionary(final_documents)
+    word_dict = corpora.Dictionary(paragraph)
     
     #Creating term-document frequency for Gensim LDA
-    corpus = [word_dict.doc2bow(document) for document in final_documents]
+    corpus = [word_dict.doc2bow(document) for document in paragraph]
     
-    best_model = build_lda_model(corpus, final_documents, word_dict)
+    best_model = build_lda_model(corpus, paragraph, word_dict)
     
     topics = [dict(topic[1]) for topic in best_model.show_topics(formatted = False)]
     
@@ -153,16 +90,18 @@ def obtain_key_words(data):
             if keywords.get(word) == None: keywords[word] = importance
             else: keywords[word] += importance
     
-    num_words_output = int(FRACTION_OUTPUT * len(tokenized_documents))
+    num_words_output = int(FRACTION_OUTPUT * len(keywords))
     
     keywords = sorted(keywords.items(), key = lambda item: item[1], reverse = True)
     
     #Returning top 25% keywords in the paragraph with value above 1 for each word
     output = keywords[0: num_words_output]
-    for index in range(len(output)):
-        output[index] = list(output[index])
-        output[index][1] = output[index][1] + 1
-        output[index] = tuple(output[index])
+    
+    #Exponentiating the importance - doesn't really add to the compound discriminating
+    #power
+#    for index in range(len(output)):
+#        output[index] = list(output[index])
+#        output[index][1] = math.exp(output[index][1])
+#        output[index] = tuple(output[index])
         
     return output
-    

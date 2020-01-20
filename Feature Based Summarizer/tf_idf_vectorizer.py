@@ -1,8 +1,5 @@
-from bs4 import BeautifulSoup as BS
-import re
-from nltk.tokenize import sent_tokenize, word_tokenize
-import string
-from nltk.corpus import stopwords
+import spacy
+from spacy.lang.en.stop_words import STOP_WORDS as spacy_stop_words
 from numpy import log
 
 '''
@@ -10,27 +7,14 @@ from numpy import log
     For use, pass the text data, and the kind of vectorization
     desired (tf or tf-idf)
 '''
-def tf_idf_vectorize(data, mode = 'tf'):
+def tf_idf_vectorize(sentence_mapper, mode = 'tf', spacy_tool = spacy.load('en_core_web_md'), stop_words = spacy_stop_words):
     if not (mode == 'tf' or mode == 'tf-idf'):
         raise InvalidVectorizationTechniqueError('Invalid mode chosen.')
 
-    # Cleaning the data
-    non_space_regex = '[0-9\[\]%/,()–"\']' # Removing numbers, square and round brackets, quotes, apostrophes, hypens, obliques
-
-    sentences = sent_tokenize(data)
-    original_sentences = sent_tokenize(data)
+    original_sentences = list(sentence_mapper.keys())
+    processed_sentences = list(sentence_mapper.values())
     
-    for index, sent in enumerate(sentences):
-       sentences[index] = re.sub(non_space_regex, '', sent) 
-
-    # Removing punctuations in each sentence (like periods)
-    sentences = [sent.translate(str.maketrans('', '', string.punctuation)) for sent in sentences]
-
-    words = [word for sent in sentences for word in word_tokenize(sent)]
-
-    # Removing stopwords from words list as well as sentences list
-    stop_words = stopwords.words('english')
-    words = [word for word in words if word not in stop_words]
+    words = [word for sentence in processed_sentences for word in sentence]
 
     term_freq_matrix = {}
 
@@ -52,11 +36,9 @@ def tf_idf_vectorize(data, mode = 'tf'):
         for sent in original_sentences:
             sentence_scores[sent] = 0
             
-        for i, sent in enumerate(sentences):
-            sent_words = word_tokenize(sent)
-            for word in sent_words:
-                if word in words:
-                    sentence_scores[original_sentences[i]] += term_freq_matrix[word]
+        for i, sentence in enumerate(processed_sentences):
+            for word in sentence:
+                sentence_scores[original_sentences[i]] += term_freq_matrix[word]
     else:
         # Calculating Inverse Document Frequency - treating each sentence as a document
         num_docs = len(original_sentences)
@@ -66,7 +48,7 @@ def tf_idf_vectorize(data, mode = 'tf'):
         for word in words:
             if idf_matrix.get(word) == None:
                 count = 0
-                for sent in sentences:
+                for sent in processed_sentences:
                     if word in sent: count += 1
                 idf_matrix[word] = count
 
@@ -83,11 +65,9 @@ def tf_idf_vectorize(data, mode = 'tf'):
         for sent in original_sentences:
             sentence_scores[sent] = 0
             
-        for i, sent in enumerate(sentences):
-            sent_words = word_tokenize(sent)
-            for word in sent_words:
-                if word in words:
-                    sentence_scores[original_sentences[i]] += tf_idf_score[word]
+        for i, sentence in enumerate(processed_sentences):
+            for word in sentence:
+                sentence_scores[original_sentences[i]] += tf_idf_score[word]
 
     #Returning the score of each sentence
     return sentence_scores

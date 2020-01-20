@@ -15,10 +15,12 @@ def compute_similarity(similarity_tool, word_one, word_two):
 '''
 def compute_paragraph_importance(keywords, cue_words):
     importance_matrix = []
-    spacy_tool = spacy.load('en_core_web_lg')
+    spacy_tool = spacy.load('en_core_web_md')
     
     for keyword, relevance in keywords.items():
         row = []
+        #Exponentiating the convolution of topic importance
+        #and its similarity gives better discrimination power.
         for cue_word in cue_words:
             row.append(np.exp(relevance * compute_similarity(spacy_tool, keyword, cue_word)))
             
