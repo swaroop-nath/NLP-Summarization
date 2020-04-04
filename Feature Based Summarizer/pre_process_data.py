@@ -48,7 +48,7 @@ def remove_stop_words(stop_word_list, paragraph):
     dict_3: key - paragraph_id, value - finalized_paragraph
     paragraph is a 1D array of sentences, which in turn is a 1D array of words.
 '''
-def pre_process_data(text_corpus, spacy_tool = spacy.load('en_core_web_md'), stop_word_list = spacy_stop_words):
+def pre_process_data(text_corpus, spacy_tool = spacy.load('en_core_web_lg'), stop_word_list = spacy_stop_words):
     # First step - extract original sentences and map each to a paragraph
     paragraphs = text_corpus.split('\n')
     original_sentences = []

@@ -7,7 +7,7 @@ from numpy import log
     For use, pass the text data, and the kind of vectorization
     desired (tf or tf-idf)
 '''
-def tf_idf_vectorize(sentence_mapper, mode = 'tf', spacy_tool = spacy.load('en_core_web_md'), stop_words = spacy_stop_words):
+def tf_idf_vectorize(sentence_mapper, mode = 'tf', spacy_tool = spacy.load('en_core_web_lg'), stop_words = spacy_stop_words):
     if not (mode == 'tf' or mode == 'tf-idf'):
         raise InvalidVectorizationTechniqueError('Invalid mode chosen.')
 

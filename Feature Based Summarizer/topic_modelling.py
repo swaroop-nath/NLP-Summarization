@@ -1,5 +1,4 @@
 #Imports
-import math
 import spacy
 import gensim.corpora as corpora
 from gensim.models import ldamodel, CoherenceModel
@@ -72,7 +71,7 @@ def build_lda_model(corpus, final_documents, word_dict):
     return best_lda_model
         
 
-def obtain_key_words(paragraph, spacy_tool = spacy.load('en_core_web_md', disable = ['parser', 'ner'])):
+def obtain_key_words(paragraph, spacy_tool = spacy.load('en_core_web_lg', disable = ['parser', 'ner'])):
     #Creating a dictionary of words
     word_dict = corpora.Dictionary(paragraph)
     
